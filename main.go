@@ -47,22 +47,18 @@ func main() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Silakan kirim gambar yang ingin Anda konversi menjadi stiker.")
 				bot.Send(msg)
 
-				// Membaca pesan berikutnya yang harus berupa gambar
 				nextUpdate := <-updates
 				if nextUpdate.Message == nil || nextUpdate.Message.Photo == nil {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Maaf, tidak ada gambar yang dikirim. Perintah dibatalkan.")
 					bot.Send(msg)
 				} else {
-					// Mengambil foto pertama dari pesan
 					photo := (*nextUpdate.Message.Photo)[0]
 
-					// Mengunduh foto ke server Anda
 					fileConfig := tgbotapi.FileConfig{
 						FileID: photo.FileID,
 					}
 					file, _ := bot.GetFile(fileConfig)
 
-					// Mengunduh gambar ke server Anda
 					fileURL := "https://api.telegram.org/file/bot" + configuration.ApiKey + "/" + file.FilePath
 					response, err := http.Get(fileURL)
 					if err != nil {
@@ -71,14 +67,12 @@ func main() {
 					}
 					defer response.Body.Close()
 
-					// Membaca gambar sebagai byte slice
 					imageData, err := ioutil.ReadAll(response.Body)
 					if err != nil {
 						log.Println("Gagal membaca gambar:", err)
 						return
 					}
 
-					// Mengirim gambar sebagai stiker dengan ukuran normal
 					sticker := tgbotapi.NewStickerUpload(update.Message.Chat.ID, tgbotapi.FileBytes{
 						Name:  "sticker.png",
 						Bytes: imageData,
