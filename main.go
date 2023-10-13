@@ -1,10 +1,10 @@
 package main
 
 import (
-	c "bot/mod/configuration"
-	"io/ioutil"
+	c "bot-telegram/configuration"
+	"bot-telegram/service"
+	"fmt"
 	"log"
-	"net/http"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -41,47 +41,36 @@ func main() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Halo!")
 				bot.Send(msg)
 			case "help":
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Ini adalah bot bantuan. Anda dapat melakukan perintah-perintah berikut:\n/start - Memulai bot\n/help - Menampilkan bantuan\n/converttosticker - merubah gambar jadi stiker")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Ini adalah bot bantuan. Anda dapat melakukan perintah-perintah berikut:\n/start - untuk memunculkan kata Halo!\n/help - Menampilkan bantuan\n/converttosticker - merubah gambar jadi stiker (beta version v:)"+
+					"\n/converttime - merubah waktu\n/converttemperature - Converted Temperature\n/kritiksaran untuk memberikan kritik dan saran")
 				bot.Send(msg)
 			case "converttosticker":
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Silakan kirim gambar yang ingin Anda konversi menjadi stiker.")
+				service.HandleConvertToSticker(&update, bot, updates, configuration)
+			case "converttime":
+				convertedValue := service.ConvertTime(3600, "detik", "jam")
+				msgText := fmt.Sprintf("%d %s sama dengan %s %s.", 3600, "detik", convertedValue, "jam")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+				bot.Send(msg)
+			case "converttemperature":
+				service.HandleTemperatureConversion(&update, bot)
+			case "kritiksaran":
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Silakan masukkan kritik dan saran Anda:")
 				bot.Send(msg)
 
 				nextUpdate := <-updates
-				if nextUpdate.Message == nil || nextUpdate.Message.Photo == nil {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Maaf, tidak ada gambar yang dikirim. Perintah dibatalkan.")
+				if nextUpdate.Message == nil {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Maaf, pesan tidak valid. Perintah dibatalkan.")
 					bot.Send(msg)
 				} else {
-					photo := (*nextUpdate.Message.Photo)[0]
+					kritikDanSaran := nextUpdate.Message.Text
+					kritikDanSaranMessage := tgbotapi.NewMessage(2050877699, "Kritik dan Saran:\n"+kritikDanSaran)
+					bot.Send(kritikDanSaranMessage)
 
-					fileConfig := tgbotapi.FileConfig{
-						FileID: photo.FileID,
-					}
-					file, _ := bot.GetFile(fileConfig)
-
-					fileURL := "https://api.telegram.org/file/bot" + configuration.ApiKey + "/" + file.FilePath
-					response, err := http.Get(fileURL)
-					if err != nil {
-						log.Println("Gagal mengunduh gambar:", err)
-						return
-					}
-					defer response.Body.Close()
-
-					imageData, err := ioutil.ReadAll(response.Body)
-					if err != nil {
-						log.Println("Gagal membaca gambar:", err)
-						return
-					}
-
-					sticker := tgbotapi.NewStickerUpload(update.Message.Chat.ID, tgbotapi.FileBytes{
-						Name:  "sticker.png",
-						Bytes: imageData,
-					})
-
-					bot.Send(sticker)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Terima kasih atas kritik dan sarannya. Pesan Anda telah terkirim.")
+					bot.Send(msg)
 				}
-			}
 
+			}
 		} else {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Perintah tidak dikenal. Gunakan /help untuk melihat perintah yang tersedia.")
 			bot.Send(msg)

@@ -38,8 +38,7 @@ func convertTemperature(temperature float64, fromUnit, toUnit string) float64 {
 	return convertedTemperature
 }
 
-// Fungsi untuk menangani perintah konversi suhu
-func handleTemperatureConversion(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func HandleTemperatureConversion(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	commandParts := strings.Fields(update.Message.CommandArguments())
 	if len(commandParts) != 3 {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Gunakan perintah dengan format yang benar, misalnya: /converttemperature 30 Celsius Fahrenheit")
