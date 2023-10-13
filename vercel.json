@@ -2,8 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "main.go",
-      "use": "@now/go"
+      "src": "start.sh",
+      "use": "@now/sh"
     }
   ]
 }
