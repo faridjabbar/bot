@@ -1,9 +1,11 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "main.go",
-      "use": "@vercel/go"
+    { "src": "main.go", "use": "@vercel/go" }
+  ],
+  "functions": {
+    "api/*": {
+      "runtime": "@vercel/go"
     }
-  ]
+  }
 }
