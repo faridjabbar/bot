@@ -1,11 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "main.go", "use": "@vercel/go" }
-  ],
   "functions": {
-    "api/*": {
-      "runtime": "@vercel/go"
+    "bot": {
+      "runtime": "go1.20",
+      "memory": 128
     }
   }
 }
